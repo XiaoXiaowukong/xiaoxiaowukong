@@ -2,6 +2,7 @@ package com.huatai.gn.letravel.views;/**
  * Created by jyt on 2016/9/20.
  */
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
@@ -198,21 +199,25 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
 
         }
         if (requestCode == CAMERA_PHOTO) {
-            PhotoModel cameraPhotoModel = new PhotoModel();
-            cameraPhotoModel.setOriginalPath(path + imagename);
-            factSelected.add(cameraPhotoModel);
-            selected.clear();
-            if (factSelected.size() < 6) {
-                PhotoModel addModel = new PhotoModel();
-                addModel.setOriginalPath("default");
-                selected.addAll(factSelected);
-                selected.add(addModel);
+            if (resultCode == Activity.RESULT_CANCELED) {
+
             } else {
-                selected.addAll(factSelected);
+                PhotoModel cameraPhotoModel = new PhotoModel();
+                cameraPhotoModel.setOriginalPath(path + imagename);
+                factSelected.add(cameraPhotoModel);
+                selected.clear();
+                if (factSelected.size() < 6) {
+                    PhotoModel addModel = new PhotoModel();
+                    addModel.setOriginalPath("default");
+                    selected.addAll(factSelected);
+                    selected.add(addModel);
+                } else {
+                    selected.addAll(factSelected);
+                }
+                adapter.notifyDataSetChanged();
+                MediaScannerConnection.scanFile(getActivity(),
+                        new String[]{str_choosed_img}, null, null);
             }
-            adapter.notifyDataSetChanged();
-            MediaScannerConnection.scanFile(getActivity(),
-                    new String[]{str_choosed_img}, null, null);
         }
         if (requestCode == DATA_CHANGE_REQUST && resultCode == DATA_CHANGE_RESULT) {
             if (PhotoFragment.factSelected.size() < PhotoFragment.maxNumber) {
