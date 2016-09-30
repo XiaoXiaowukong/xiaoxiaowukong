@@ -1,16 +1,17 @@
-package com.wukong.xiaoxiao.photoselectdemo.views;
+package com.huatai.gn.letravel.views;
 
-import android.app.Activity;
-import android.os.Bundle;
+import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
 
 
-import com.wukong.xiaoxiao.photoselectdemo.R;
-import com.wukong.xiaoxiao.photoselectdemo.adapters.PhotoViewPagerAdapter;
-import com.wukong.xiaoxiao.photoselectdemo.beans.PhotoModel;
+import com.huatai.gn.letravel.R;
+import com.huatai.gn.letravel.base.BaseActivity;
+import com.huatai.gn.letravel.models.settings.ComplaintActivity;
+import com.huatai.gn.letravel.adapters.PhotoViewPagerAdapter;
+import com.huatai.gn.letravel.beans.PhotoModel;
+import com.huatai.gn.letravel.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,38 +20,30 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/6/7.
  */
-public class PhotoViewActivity extends Activity implements View.OnClickListener, ViewPager.OnPageChangeListener {
+public class PhotoViewActivity extends BaseActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
     private ViewPager mPager;
     public List<PhotoModel> selectPic;
+    private TitleBar titleBar;
     private PhotoViewPagerAdapter photoViewPagerAdapter;
     private int index;
     private int position;
-    private TextView tvLeft, tvRight;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_pager);
-        initView();
+    protected int getLayoutId() {
+        return R.layout.activity_view_pager;
     }
 
+    @Override
     protected void initView() {
         selectPic = new ArrayList<>();
-        selectPic.addAll(PhotoFragment.selected);
-        if (PhotoFragment.selected.size() == PhotoFragment.maxNumber) {
-            if (PhotoFragment.selected.get(PhotoFragment.maxNumber - 1).getOriginalPath().equals("default")) {//说明有五张图加一张加载图
-                selectPic.remove(PhotoFragment.selected.size() - 1);
-            } else {//说明有六张真实的图
-
-            }
-        }
+        selectPic.addAll(PhotoFragment.factSelected);
 
         position = getIntent().getIntExtra(PhotoFragment.POSITION, 1);
         mPager = (ViewPager) findViewById(R.id.pager);
-        tvLeft = (TextView) findViewById(R.id.layout_left);
-        tvRight = (TextView) findViewById(R.id.layout_right);
-        tvLeft.setOnClickListener(this);
-        tvRight.setOnClickListener(this);
+        titleBar = (TitleBar) findViewById(R.id.photo_view_title);
+        titleBar.setRightText("删除");
+        titleBar.setRightClickListener(this);
+        titleBar.setLeftClickListener(this);
         mPager.setPageMargin((int) (getResources().getDisplayMetrics().density * 15));
         photoViewPagerAdapter = new PhotoViewPagerAdapter(selectPic, this);
         mPager.setAdapter(photoViewPagerAdapter);
@@ -59,15 +52,19 @@ public class PhotoViewActivity extends Activity implements View.OnClickListener,
         index = position;
     }
 
+    @Override
+    protected void loadData() {
+
+    }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.layout_right:
-                PhotoFragment.selected.remove(index);
+                PhotoFragment.factSelected.remove(index);
                 selectPic.remove(index);
                 photoViewPagerAdapter.notifyDataSetChanged();
-                if (PhotoFragment.selected.size() == 1) {
+                if (PhotoFragment.factSelected.size() == 0) {
                     setResult(PhotoFragment.DATA_CHANGE_RESULT);
                     PhotoViewActivity.this.finish();
                 }

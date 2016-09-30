@@ -1,4 +1,4 @@
-package com.wukong.xiaoxiao.photoselectdemo.views;/**
+package com.huatai.gn.letravel.views;/**
  * Created by jyt on 2016/9/20.
  */
 
@@ -14,16 +14,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.wukong.xiaoxiao.photoselectdemo.R;
-import com.wukong.xiaoxiao.photoselectdemo.adapters.GdAdapter;
-import com.wukong.xiaoxiao.photoselectdemo.beans.PhotoModel;
-import com.wukong.xiaoxiao.photoselectdemo.utils.PictureUtil;
+import com.huatai.gn.letravel.R;
+import com.huatai.gn.letravel.adapters.GdAdapter;
+import com.huatai.gn.letravel.beans.PhotoModel;
+import com.huatai.gn.letravel.utils.LogUtils;
+import com.huatai.gn.letravel.utils.PictureUtil;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +43,8 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
     public static final String POSITION = "position";
     // 选择图片
 
-    public static List<PhotoModel> selected;
+    public static List<PhotoModel> selected;//展示的照片地址
+    public static List<PhotoModel> factSelected;//实际真实的照片地址
 
     public static final int SELECT_IMAGE_CODE = 1001;
     public static final int CAMERA_PHOTO = 10002;
@@ -75,11 +79,16 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
 
     protected void initView(View view) {
         gd = (GridView) view.findViewById(R.id.gd);
-        selected = new ArrayList<>();
+
         PhotoModel photoModel = new PhotoModel();
         photoModel.setOriginalPath("default");
-        selected.add(photoModel);
+
+
+        selected = new ArrayList<>();
+        factSelected = new ArrayList<>();
         adapter = new GdAdapter(getActivity(), selected);
+
+        selected.add(photoModel);
         gd.setAdapter(adapter);
         gd.setOnItemClickListener(this);
     }
@@ -87,30 +96,19 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (selected.size() == maxNumber) {
-            if (selected.get(maxNumber - 1).getOriginalPath().equals("default")) {//说明有五张图加一张加载图
-                if (position == selected.size() - 1) {// 如果是最后一个
-                    showChooseIMG_WAYDialog();
-                } else {//浏览图片
-                    Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
-                    intent.putExtra(POSITION, position);
-                    startActivityForResult(intent, DATA_CHANGE_REQUST);
-                }
-            } else {//说明有六张真实的图
-                Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
-                intent.putExtra(POSITION, position);
-                startActivityForResult(intent, DATA_CHANGE_REQUST);
-            }
-        } else {
-            if (position == selected.size() - 1) {// 如果是最后一个
+        LogUtils.e("gn", selected.size() + "数量" + position);
+
+        if (factSelected.size() == 0) {//实际没有一张图片
+            showChooseIMG_WAYDialog();
+        } else {//有图片的
+            if (selected.get(position).getOriginalPath().equals("default")) {
                 showChooseIMG_WAYDialog();
-            } else {//浏览图片
+            } else {
                 Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
                 intent.putExtra(POSITION, position);
                 startActivityForResult(intent, DATA_CHANGE_REQUST);
             }
         }
-
     }
 
     /*
@@ -182,20 +180,19 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
 
             List<String> photos = (List<String>) data.getExtras()
                     .getSerializable("photos");
-            if (selected.size() > 0) {// 如果原来有图片
-                selected.remove(selected.size() - 1);
-            }
             for (int i = 0; i < photos.size(); i++) {
                 PhotoModel photoModel = new PhotoModel();
                 photoModel.setOriginalPath(photos.get(i));
-                selected.add(photoModel);
+                factSelected.add(photoModel);
             }
-            if (selected.size() < 6) {
+            selected.clear();
+            if (factSelected.size() < maxNumber) {
                 PhotoModel addModel = new PhotoModel();
                 addModel.setOriginalPath("default");
+                selected.addAll(factSelected);
                 selected.add(addModel);
-            } else if (selected.size() == maxNumber) {
-
+            } else if (factSelected.size() == maxNumber) {
+                selected.addAll(factSelected);
             }
             adapter.notifyDataSetChanged();
 
@@ -203,30 +200,29 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
         if (requestCode == CAMERA_PHOTO) {
             PhotoModel cameraPhotoModel = new PhotoModel();
             cameraPhotoModel.setOriginalPath(path + imagename);
-            if (selected.size() > 0) {// 如果原来有图片
-                selected.remove(selected.size() - 1);
-            }
-            selected.add(cameraPhotoModel);
-            if (selected.size() < 6) {
+            factSelected.add(cameraPhotoModel);
+            selected.clear();
+            if (factSelected.size() < 6) {
                 PhotoModel addModel = new PhotoModel();
                 addModel.setOriginalPath("default");
+                selected.addAll(factSelected);
                 selected.add(addModel);
-            } else if (selected.size() == maxNumber) {
-
+            } else {
+                selected.addAll(factSelected);
             }
             adapter.notifyDataSetChanged();
             MediaScannerConnection.scanFile(getActivity(),
                     new String[]{str_choosed_img}, null, null);
         }
         if (requestCode == DATA_CHANGE_REQUST && resultCode == DATA_CHANGE_RESULT) {
-            if (PhotoFragment.selected.size() < PhotoFragment.maxNumber) {
-                if (PhotoFragment.selected.get(PhotoFragment.selected.size() - 1).getOriginalPath().equals("default")) {//说明有五张图加一张加载图
-
-                } else {//没有加载图
-                    PhotoModel addModel = new PhotoModel();
-                    addModel.setOriginalPath("default");
-                    selected.add(addModel);
-                }
+            if (PhotoFragment.factSelected.size() < PhotoFragment.maxNumber) {
+                selected.clear();
+                PhotoModel addModel = new PhotoModel();
+                addModel.setOriginalPath("default");
+                selected.addAll(factSelected);
+                selected.add(addModel);
+            } else {
+                selected.addAll(factSelected);
             }
             adapter.notifyDataSetChanged();
         }
