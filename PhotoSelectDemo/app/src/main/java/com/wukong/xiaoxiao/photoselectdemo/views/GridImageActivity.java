@@ -3,18 +3,14 @@ package com.wukong.xiaoxiao.photoselectdemo.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,9 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.bumptech.glide.Glide;
 import com.wukong.xiaoxiao.photoselectdemo.R;
 
 import java.io.File;
@@ -57,8 +51,6 @@ public class GridImageActivity extends Activity implements View.OnClickListener 
     public ArrayList<String> selectedPicture = new ArrayList<String>();
     private String cameraPath = null;
     private Floder imageAll, currentImageFolder;
-    private ImageLoader loader;
-    private DisplayImageOptions options;
     private FolderAdapter dirAdapter;
 
     @Override
@@ -94,11 +86,6 @@ public class GridImageActivity extends Activity implements View.OnClickListener 
 
     private void initViews() {
         selectedPicture.clear();//每次进来清除数据
-        loader = ImageLoader.getInstance();
-        options = new DisplayImageOptions.Builder().showImageOnLoading(R.mipmap.ic_launcher)
-                .showImageForEmptyUri(R.mipmap.ic_launcher).showImageOnFail(R.mipmap.ic_launcher)
-                .cacheInMemory(true).cacheOnDisk(true).considerExifParams(true)
-                .imageScaleType(ImageScaleType.EXACTLY).bitmapConfig(Bitmap.Config.RGB_565).build();
 
         imageAll = new Floder();
         imageAll.setDir("/所有图片");
@@ -250,7 +237,7 @@ public class GridImageActivity extends Activity implements View.OnClickListener 
 
 
             final ImageItem item = currentImageFolder.images.get(position);
-            loader.displayImage("file://" + item.path, holder.imageView, options);
+            Glide.with(GridImageActivity.this).load("file://" + item.path).into(holder.imageView);
             //如果需要标记已经选择的图片得话，可以打开这段代码
 //            if (selectedPicture.contains(item.path)) {
 //                holder.tv_click.setChecked(true);
@@ -356,8 +343,7 @@ public class GridImageActivity extends Activity implements View.OnClickListener 
         @Override
         public void onBindViewHolder(FolderViewHolder holder, int position) {
             final Floder item = mDirPaths.get(position);
-            loader.displayImage("file://" + item.getFirstImagePath(), holder.iv_dir, options);
-//            util.ImageLoader.getInstance().loadImage(item.getFirstImagePath(),holder.iv_dir);
+            Glide.with(GridImageActivity.this).load("file://" + item.getFirstImagePath()).into(holder.iv_dir);
             holder.tv_dirname.setText(item.name + " (" + item.images.size() + "张) ");
             holder.ll_root.setSelected(currentImageFolder == item);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
