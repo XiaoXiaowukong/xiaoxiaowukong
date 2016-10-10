@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.wukong.xiaoxiao.photoselectdemo.views.PhotoFragment.maxNumber;
 
+
 /**
  * Created by Hanks on 2015/9/14.
  */

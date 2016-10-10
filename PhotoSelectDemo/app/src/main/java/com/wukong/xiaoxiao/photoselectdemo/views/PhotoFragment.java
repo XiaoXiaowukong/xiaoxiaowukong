@@ -1,4 +1,5 @@
-package com.huatai.gn.letravel.views;/**
+package com.wukong.xiaoxiao.photoselectdemo.views;
+/**
  * Created by jyt on 2016/9/20.
  */
 
@@ -15,19 +16,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.huatai.gn.letravel.R;
-import com.huatai.gn.letravel.adapters.GdAdapter;
-import com.huatai.gn.letravel.beans.PhotoModel;
-import com.huatai.gn.letravel.utils.LogUtils;
-import com.huatai.gn.letravel.utils.PictureUtil;
+
+import com.wukong.xiaoxiao.photoselectdemo.R;
+import com.wukong.xiaoxiao.photoselectdemo.adapters.GdAdapter;
+import com.wukong.xiaoxiao.photoselectdemo.beans.PhotoModel;
+import com.wukong.xiaoxiao.photoselectdemo.utils.PictureUtil;
+import com.wukong.xiaoxiao.photoselectdemo.views.MyPhotoDialog;
 
 import java.io.File;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -97,7 +96,6 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        LogUtils.e("gn", selected.size() + "数量" + position);
 
         if (factSelected.size() == 0) {//实际没有一张图片
             showChooseIMG_WAYDialog();
@@ -227,6 +225,7 @@ public class PhotoFragment extends Fragment implements AdapterView.OnItemClickLi
                 selected.addAll(factSelected);
                 selected.add(addModel);
             } else {
+                selected.clear();
                 selected.addAll(factSelected);
             }
             adapter.notifyDataSetChanged();

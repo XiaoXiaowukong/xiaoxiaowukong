@@ -38,7 +38,6 @@ public class PhotoViewPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         ImageView view = new ImageView(context);
-//        view.enable();
         view.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Glide.with(context)
                 .load("file://" + selected.get(position).getOriginalPath())

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import com.wukong.xiaoxiao.photoselectdemo.views.PhotoFragment;
 
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
